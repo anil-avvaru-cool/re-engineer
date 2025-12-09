@@ -1,0 +1,8 @@
+lxml
+sentence-transformers
+faiss-cpu
+tqdm
+neo4j                     # optional, for Neo4j graph write
+python-dotenv
+tree_sitter
+pytest
