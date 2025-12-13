@@ -1,0 +1,27 @@
+Option Public
+Use "SLAUtils"
+Sub Initialize
+    Dim session As New NotesSession
+    Dim db As NotesDatabase
+    Set db = session.CurrentDatabase
+    Dim view As NotesView
+    Set view = db.GetView("AllIssues")
+    Dim doc As NotesDocument
+    Set doc = view.GetFirstDocument()
+    While Not doc Is Nothing
+        On Error Resume Next
+        Dim created As NotesDateTime
+        Set created = New NotesDateTime(doc.CreatedDate(0))
+        Dim deadline As NotesDateTime
+        Set deadline = ComputeSLADeadline(doc.SLAType(0), created)
+        doc.SLADeadline = deadline.Localtime
+        Dim nowdt As New NotesDateTime(Now)
+        If nowdt.TimeDifference(deadline) < 0 Then
+            doc.SLAStatus = "Breached"
+        Else
+            doc.SLAStatus = "OK"
+        End If
+        Call doc.Save(True, False)
+        Set doc = view.GetNextDocument(doc)
+    Wend
+End Sub

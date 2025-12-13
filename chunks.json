@@ -1,0 +1,611 @@
+[
+  {
+    "id": "lss_file_CreateIssueAgent.lss_d8084587",
+    "type": "lotusscript_file",
+    "file_path": "sample_data\\issue_tracker\\agents\\CreateIssueAgent.lss",
+    "language": "LotusScript",
+    "size_bytes": 1168,
+    "line_count": 34,
+    "complexity": 8,
+    "dependencies": [
+      "IssueUtils",
+      "NotificationUtils"
+    ],
+    "content": "LotusScript file CreateIssueAgent.lss containing agents or shared logic.",
+    "metadata": {
+      "dependencies": [
+        "IssueUtils",
+        "NotificationUtils"
+      ]
+    }
+  },
+  {
+    "id": "lss_block_Initialize_01f187b1",
+    "type": "sub",
+    "file_path": "sample_data\\issue_tracker\\agents\\CreateIssueAgent.lss",
+    "language": "LotusScript",
+    "size_bytes": 1112,
+    "line_count": 31,
+    "complexity": 8,
+    "dependencies": [
+      "IssueUtils",
+      "NotificationUtils"
+    ],
+    "content": "Sub Initialize\n    On Error GoTo ErrHandler\n    Dim session As New NotesSession\n    Dim db As NotesDatabase\n    Set db = session.CurrentDatabase\n\n    Dim doc As NotesDocument\n    Set doc = db.CreateDocument()\n    doc.Form = \"IssueForm\"\n    doc.IssueID = GenerateIssueID(session)\n    doc.Title = \"Sample issue created by CreateIssueAgent\"\n    Dim rtitem As NotesRichTextItem\n    Set rtitem = New NotesRichTextItem(doc, \"Description\")\n    Call rtitem.AppendText(\"This issue was created by CreateIssueAgent for testing.\")\n    doc.Priority = \"Medium\"\n    doc.Status = \"New\"\n    doc.CreatedBy = session.CommonUserName\n    doc.CreatedDate = Now\n    doc.AssignedTo = session.CommonUserName\n    doc.NotifyOnCreate = \"1\"\n    Call doc.Save(True, False)\n\n    If (doc.NotifyOnCreate(0) = \"1\") Then\n        Call SendIssueNotification(db, doc.AssignedTo(0), \"New Issue Assigned: \" & doc.IssueID(0), \"Title: \" & doc.Title(0))\n    End If\n\n    Messagebox \"Issue created: \" & doc.IssueID(0), , \"CreateIssueAgent\"\n    Exit Sub\nErrHandler:\n    Messagebox \"Error in CreateIssueAgent: \" & Err & \" - \" & Error$, , \"Agent Error\"\nEnd Sub",
+    "metadata": {
+      "name": "Initialize",
+      "parent_file": "CreateIssueAgent.lss"
+    }
+  },
+  {
+    "id": "lss_file_GetIssues.lss_d8a1e759",
+    "type": "lotusscript_file",
+    "file_path": "sample_data\\issue_tracker\\agents\\GetIssues.lss",
+    "language": "LotusScript",
+    "size_bytes": 905,
+    "line_count": 27,
+    "complexity": 3,
+    "dependencies": [],
+    "content": "LotusScript file GetIssues.lss containing agents or shared logic.",
+    "metadata": {
+      "dependencies": []
+    }
+  },
+  {
+    "id": "lss_block_Initialize_ce71e012",
+    "type": "sub",
+    "file_path": "sample_data\\issue_tracker\\agents\\GetIssues.lss",
+    "language": "LotusScript",
+    "size_bytes": 863,
+    "line_count": 26,
+    "complexity": 3,
+    "dependencies": [],
+    "content": "Sub Initialize\n    Dim session As New NotesSession\n    Dim db As NotesDatabase\n    Set db = session.CurrentDatabase\n    Dim view As NotesView\n    Set view = db.GetView(\"AllIssues\")\n    Dim doc As NotesDocument\n    Set doc = view.GetFirstDocument()\n    Dim json As String\n    json = \"[\"\n    Dim first As Boolean\n    first = True\n    While Not doc Is Nothing\n        If Not first Then json = json & \",\"\n        json = json & \"{\"\n        json = json & chr$(34) & \"IssueID\" & chr$(34) & \":\" & chr$(34) & doc.IssueID(0) & chr$(34) & \",\"\n        json = json & chr$(34) & \"Title\" & chr$(34) & \":\" & chr$(34) & Replace(doc.Title(0), chr$(34), \"\\\" & chr$(34)) & chr$(34)\n        json = json & \"}\"\n        first = False\n        Set doc = view.GetNextDocument(doc)\n    Wend\n    json = json & \"]\"\n    Print |Content-Type: application/json|\n    Print \"\"\n    Print json\nEnd Sub",
+    "metadata": {
+      "name": "Initialize",
+      "parent_file": "GetIssues.lss"
+    }
+  },
+  {
+    "id": "lss_file_IssuesJSONAgent.lss_c65ddbc0",
+    "type": "lotusscript_file",
+    "file_path": "sample_data\\issue_tracker\\agents\\IssuesJSONAgent.lss",
+    "language": "LotusScript",
+    "size_bytes": 1421,
+    "line_count": 42,
+    "complexity": 5,
+    "dependencies": [],
+    "content": "LotusScript file IssuesJSONAgent.lss containing agents or shared logic.",
+    "metadata": {
+      "dependencies": []
+    }
+  },
+  {
+    "id": "lss_block_Initialize_24ff79eb",
+    "type": "sub",
+    "file_path": "sample_data\\issue_tracker\\agents\\IssuesJSONAgent.lss",
+    "language": "LotusScript",
+    "size_bytes": 1086,
+    "line_count": 28,
+    "complexity": 3,
+    "dependencies": [],
+    "content": "Sub Initialize\n    Dim session As New NotesSession\n    Dim db As NotesDatabase\n    Set db = session.CurrentDatabase\n    Dim view As NotesView\n    Set view = db.GetView(\"AllIssues\")\n    Dim doc As NotesDocument\n    Set doc = view.GetFirstDocument()\n    Dim json As String\n    json = \"[\"\n    Dim first As Boolean\n    first = True\n    While Not doc Is Nothing\n        If Not first Then json = json & \",\"\n        json = json & \"{\"\n        json = json & chr$(34) & \"IssueID\" & chr$(34) & \":\" & chr$(34) & EscapeJSON(doc.IssueID(0)) & chr$(34) & \",\"\n        json = json & chr$(34) & \"Title\" & chr$(34) & \":\" & chr$(34) & EscapeJSON(doc.Title(0)) & chr$(34) & \",\"\n        json = json & chr$(34) & \"Priority\" & chr$(34) & \":\" & chr$(34) & EscapeJSON(doc.Priority(0)) & chr$(34) & \",\"\n        json = json & chr$(34) & \"Status\" & chr$(34) & \":\" & chr$(34) & EscapeJSON(doc.Status(0)) & chr$(34)\n        json = json & \"}\"\n        first = False\n        Set doc = view.GetNextDocument(doc)\n    Wend\n    json = json & \"]\"\n    Print |Content-Type: application/json|\n    Print \"\"\n    Print json\nEnd Sub",
+    "metadata": {
+      "name": "Initialize",
+      "parent_file": "IssuesJSONAgent.lss"
+    }
+  },
+  {
+    "id": "lss_block_EscapeJSON_d2ac86e4",
+    "type": "function",
+    "file_path": "sample_data\\issue_tracker\\agents\\IssuesJSONAgent.lss",
+    "language": "LotusScript",
+    "size_bytes": 318,
+    "line_count": 12,
+    "complexity": 2,
+    "dependencies": [],
+    "content": "Function EscapeJSON(s As String) As String\n    If s = \"\" Then\n        EscapeJSON = \"\"\n        Exit Function\n    End If\n    s = Replace(s, \"\\\\\", \"\\\\\\\\\")\n    s = Replace(s, \"\\\"\"\", \"\\\\\\\"\")\n    s = Replace(s, \"/\", \"\\\\/\")\n    s = Replace(s, Chr(10), \"\\\\n\")\n    s = Replace(s, Chr(13), \"\\\\r\")\n    EscapeJSON = s\nEnd Function",
+    "metadata": {
+      "name": "EscapeJSON",
+      "parent_file": "IssuesJSONAgent.lss"
+    }
+  },
+  {
+    "id": "lss_file_LogFieldChanges.lss_c298d757",
+    "type": "lotusscript_file",
+    "file_path": "sample_data\\issue_tracker\\agents\\LogFieldChanges.lss",
+    "language": "LotusScript",
+    "size_bytes": 595,
+    "line_count": 18,
+    "complexity": 3,
+    "dependencies": [],
+    "content": "LotusScript file LogFieldChanges.lss containing agents or shared logic.",
+    "metadata": {
+      "dependencies": []
+    }
+  },
+  {
+    "id": "lss_block_Initialize_b9d31676",
+    "type": "sub",
+    "file_path": "sample_data\\issue_tracker\\agents\\LogFieldChanges.lss",
+    "language": "LotusScript",
+    "size_bytes": 562,
+    "line_count": 17,
+    "complexity": 3,
+    "dependencies": [],
+    "content": "Sub Initialize\n    On Error Resume Next\n    Dim session As New NotesSession\n    Dim db As NotesDatabase\n    Set db = session.CurrentDatabase\n    Dim ctxDoc As NotesDocument\n    Set ctxDoc = session.DocumentContext\n    If ctxDoc Is Nothing Then Exit Sub\n    Dim log As NotesDocument\n    Set log = db.CreateDocument()\n    log.Form = \"AuditLog\"\n    log.ParentUNID = ctxDoc.UniversalID\n    log.ChangedBy = session.CommonUserName\n    log.ChangedDate = Now\n    log.ChangeDetails = \"Placeholder: compute field diffs in form event\"\n    Call log.Save(True, False)\nEnd Sub",
+    "metadata": {
+      "name": "Initialize",
+      "parent_file": "LogFieldChanges.lss"
+    }
+  },
+  {
+    "id": "lss_file_NotifyOnAssignment.lss_db3ffca7",
+    "type": "lotusscript_file",
+    "file_path": "sample_data\\issue_tracker\\agents\\NotifyOnAssignment.lss",
+    "language": "LotusScript",
+    "size_bytes": 490,
+    "line_count": 14,
+    "complexity": 5,
+    "dependencies": [
+      "NotificationUtils"
+    ],
+    "content": "LotusScript file NotifyOnAssignment.lss containing agents or shared logic.",
+    "metadata": {
+      "dependencies": [
+        "NotificationUtils"
+      ]
+    }
+  },
+  {
+    "id": "lss_block_Initialize_170f7b12",
+    "type": "sub",
+    "file_path": "sample_data\\issue_tracker\\agents\\NotifyOnAssignment.lss",
+    "language": "LotusScript",
+    "size_bytes": 437,
+    "line_count": 12,
+    "complexity": 5,
+    "dependencies": [
+      "NotificationUtils"
+    ],
+    "content": "Sub Initialize\n    On Error Resume Next\n    Dim session As New NotesSession\n    Dim db As NotesDatabase\n    Set db = session.CurrentDatabase\n    Dim doc As NotesDocument\n    Set doc = session.DocumentContext\n    If doc Is Nothing Then Exit Sub\n    If doc.AssignedTo(0) <> \"\" Then\n        Call SendIssueNotification(db, doc.AssignedTo(0), \"Issue Assigned: \" & doc.IssueID(0), \"You have been assigned \" & doc.IssueID(0))\n    End If\nEnd Sub",
+    "metadata": {
+      "name": "Initialize",
+      "parent_file": "NotifyOnAssignment.lss"
+    }
+  },
+  {
+    "id": "lss_file_PostIssue.lss_c6d796a9",
+    "type": "lotusscript_file",
+    "file_path": "sample_data\\issue_tracker\\agents\\PostIssue.lss",
+    "language": "LotusScript",
+    "size_bytes": 770,
+    "line_count": 20,
+    "complexity": 1,
+    "dependencies": [],
+    "content": "LotusScript file PostIssue.lss containing agents or shared logic.",
+    "metadata": {
+      "dependencies": []
+    }
+  },
+  {
+    "id": "lss_block_Initialize_18906a31",
+    "type": "sub",
+    "file_path": "sample_data\\issue_tracker\\agents\\PostIssue.lss",
+    "language": "LotusScript",
+    "size_bytes": 735,
+    "line_count": 19,
+    "complexity": 1,
+    "dependencies": [],
+    "content": "Sub Initialize\n    Dim session As New NotesSession\n    Dim db As NotesDatabase\n    Set db = session.CurrentDatabase\n    Dim doc As NotesDocument\n    Set doc = db.CreateDocument()\n    doc.Form = \"IssueForm\"\n    doc.Title = session.DocumentContext.GetItemValue(\"Title\")(0)\n    doc.IssueID = \"ISS-\" & Format$(Now, \"yyyymmdd-hhnnss\")\n    doc.Description = session.DocumentContext.GetItemValue(\"Description\")(0)\n    doc.Priority = session.DocumentContext.GetItemValue(\"Priority\")(0)\n    doc.Status = \"New\"\n    doc.CreatedBy = session.CommonUserName\n    doc.CreatedDate = Now\n    Call doc.Save(True, False)\n    Print |Content-Type: application/json|\n    Print \"\"\n    Print \"{\"\"status\"\":\"\"ok\"\",\"\"IssueID\"\":\"\"\" & doc.IssueID(0) & \"\"\"}\"\nEnd Sub",
+    "metadata": {
+      "name": "Initialize",
+      "parent_file": "PostIssue.lss"
+    }
+  },
+  {
+    "id": "lss_file_SLAUpdater.lss_c6fda014",
+    "type": "lotusscript_file",
+    "file_path": "sample_data\\issue_tracker\\agents\\SLAUpdater.lss",
+    "language": "LotusScript",
+    "size_bytes": 900,
+    "line_count": 27,
+    "complexity": 6,
+    "dependencies": [
+      "SLAUtils"
+    ],
+    "content": "LotusScript file SLAUpdater.lss containing agents or shared logic.",
+    "metadata": {
+      "dependencies": [
+        "SLAUtils"
+      ]
+    }
+  },
+  {
+    "id": "lss_block_Initialize_95eb4ba4",
+    "type": "sub",
+    "file_path": "sample_data\\issue_tracker\\agents\\SLAUpdater.lss",
+    "language": "LotusScript",
+    "size_bytes": 843,
+    "line_count": 25,
+    "complexity": 6,
+    "dependencies": [
+      "SLAUtils"
+    ],
+    "content": "Sub Initialize\n    Dim session As New NotesSession\n    Dim db As NotesDatabase\n    Set db = session.CurrentDatabase\n    Dim view As NotesView\n    Set view = db.GetView(\"AllIssues\")\n    Dim doc As NotesDocument\n    Set doc = view.GetFirstDocument()\n    While Not doc Is Nothing\n        On Error Resume Next\n        Dim created As NotesDateTime\n        Set created = New NotesDateTime(doc.CreatedDate(0))\n        Dim deadline As NotesDateTime\n        Set deadline = ComputeSLADeadline(doc.SLAType(0), created)\n        doc.SLADeadline = deadline.Localtime\n        Dim nowdt As New NotesDateTime(Now)\n        If nowdt.TimeDifference(deadline) < 0 Then\n            doc.SLAStatus = \"Breached\"\n        Else\n            doc.SLAStatus = \"OK\"\n        End If\n        Call doc.Save(True, False)\n        Set doc = view.GetNextDocument(doc)\n    Wend\nEnd Sub",
+    "metadata": {
+      "name": "Initialize",
+      "parent_file": "SLAUpdater.lss"
+    }
+  },
+  {
+    "id": "form_IssueForm_b8164ea6",
+    "type": "form",
+    "file_path": "sample_data\\issue_tracker\\forms\\IssueForm.dxl",
+    "language": "DXL",
+    "size_bytes": 1141,
+    "line_count": 24,
+    "complexity": 15,
+    "dependencies": [],
+    "content": "Domino Form IssueForm defining Issue document structure.",
+    "metadata": {
+      "form_name": "IssueForm"
+    }
+  },
+  {
+    "id": "field_Form_763e9001",
+    "type": "field",
+    "file_path": "sample_data\\issue_tracker\\forms\\IssueForm.dxl",
+    "language": "DXL",
+    "size_bytes": 54,
+    "line_count": 1,
+    "complexity": 1,
+    "dependencies": [],
+    "content": "Field Form of type text.",
+    "metadata": {
+      "field_name": "Form",
+      "field_type": "text",
+      "form": "IssueForm"
+    }
+  },
+  {
+    "id": "field_IssueID_3c25ba7e",
+    "type": "field",
+    "file_path": "sample_data\\issue_tracker\\forms\\IssueForm.dxl",
+    "language": "DXL",
+    "size_bytes": 78,
+    "line_count": 1,
+    "complexity": 1,
+    "dependencies": [],
+    "content": "Field IssueID of type text.",
+    "metadata": {
+      "field_name": "IssueID",
+      "field_type": "text",
+      "form": "IssueForm"
+    }
+  },
+  {
+    "id": "field_Title_0d3f8f54",
+    "type": "field",
+    "file_path": "sample_data\\issue_tracker\\forms\\IssueForm.dxl",
+    "language": "DXL",
+    "size_bytes": 41,
+    "line_count": 1,
+    "complexity": 1,
+    "dependencies": [],
+    "content": "Field Title of type text.",
+    "metadata": {
+      "field_name": "Title",
+      "field_type": "text",
+      "form": "IssueForm"
+    }
+  },
+  {
+    "id": "field_Description_c2d49523",
+    "type": "field",
+    "file_path": "sample_data\\issue_tracker\\forms\\IssueForm.dxl",
+    "language": "DXL",
+    "size_bytes": 51,
+    "line_count": 1,
+    "complexity": 1,
+    "dependencies": [],
+    "content": "Field Description of type richtext.",
+    "metadata": {
+      "field_name": "Description",
+      "field_type": "richtext",
+      "form": "IssueForm"
+    }
+  },
+  {
+    "id": "field_Priority_46b2ff36",
+    "type": "field",
+    "file_path": "sample_data\\issue_tracker\\forms\\IssueForm.dxl",
+    "language": "DXL",
+    "size_bytes": 55,
+    "line_count": 1,
+    "complexity": 1,
+    "dependencies": [],
+    "content": "Field Priority of type text.",
+    "metadata": {
+      "field_name": "Priority",
+      "field_type": "text",
+      "form": "IssueForm"
+    }
+  },
+  {
+    "id": "field_Status_37385ff0",
+    "type": "field",
+    "file_path": "sample_data\\issue_tracker\\forms\\IssueForm.dxl",
+    "language": "DXL",
+    "size_bytes": 51,
+    "line_count": 1,
+    "complexity": 1,
+    "dependencies": [],
+    "content": "Field Status of type text.",
+    "metadata": {
+      "field_name": "Status",
+      "field_type": "text",
+      "form": "IssueForm"
+    }
+  },
+  {
+    "id": "field_CreatedBy_44878f32",
+    "type": "field",
+    "file_path": "sample_data\\issue_tracker\\forms\\IssueForm.dxl",
+    "language": "DXL",
+    "size_bytes": 45,
+    "line_count": 1,
+    "complexity": 1,
+    "dependencies": [],
+    "content": "Field CreatedBy of type text.",
+    "metadata": {
+      "field_name": "CreatedBy",
+      "field_type": "text",
+      "form": "IssueForm"
+    }
+  },
+  {
+    "id": "field_CreatedDate_57c555f5",
+    "type": "field",
+    "file_path": "sample_data\\issue_tracker\\forms\\IssueForm.dxl",
+    "language": "DXL",
+    "size_bytes": 51,
+    "line_count": 1,
+    "complexity": 1,
+    "dependencies": [],
+    "content": "Field CreatedDate of type datetime.",
+    "metadata": {
+      "field_name": "CreatedDate",
+      "field_type": "datetime",
+      "form": "IssueForm"
+    }
+  },
+  {
+    "id": "field_AssignedTo_12fb4f5f",
+    "type": "field",
+    "file_path": "sample_data\\issue_tracker\\forms\\IssueForm.dxl",
+    "language": "DXL",
+    "size_bytes": 46,
+    "line_count": 1,
+    "complexity": 1,
+    "dependencies": [],
+    "content": "Field AssignedTo of type text.",
+    "metadata": {
+      "field_name": "AssignedTo",
+      "field_type": "text",
+      "form": "IssueForm"
+    }
+  },
+  {
+    "id": "field_NotifyOnCreate_b52c3359",
+    "type": "field",
+    "file_path": "sample_data\\issue_tracker\\forms\\IssueForm.dxl",
+    "language": "DXL",
+    "size_bytes": 56,
+    "line_count": 1,
+    "complexity": 1,
+    "dependencies": [],
+    "content": "Field NotifyOnCreate of type text.",
+    "metadata": {
+      "field_name": "NotifyOnCreate",
+      "field_type": "text",
+      "form": "IssueForm"
+    }
+  },
+  {
+    "id": "field_SLAType_fe7d6775",
+    "type": "field",
+    "file_path": "sample_data\\issue_tracker\\forms\\IssueForm.dxl",
+    "language": "DXL",
+    "size_bytes": 56,
+    "line_count": 1,
+    "complexity": 1,
+    "dependencies": [],
+    "content": "Field SLAType of type text.",
+    "metadata": {
+      "field_name": "SLAType",
+      "field_type": "text",
+      "form": "IssueForm"
+    }
+  },
+  {
+    "id": "field_SLADeadline_8c379bab",
+    "type": "field",
+    "file_path": "sample_data\\issue_tracker\\forms\\IssueForm.dxl",
+    "language": "DXL",
+    "size_bytes": 51,
+    "line_count": 1,
+    "complexity": 1,
+    "dependencies": [],
+    "content": "Field SLADeadline of type datetime.",
+    "metadata": {
+      "field_name": "SLADeadline",
+      "field_type": "datetime",
+      "form": "IssueForm"
+    }
+  },
+  {
+    "id": "field_WorkflowState_8ddd4dcd",
+    "type": "field",
+    "file_path": "sample_data\\issue_tracker\\forms\\IssueForm.dxl",
+    "language": "DXL",
+    "size_bytes": 57,
+    "line_count": 1,
+    "complexity": 1,
+    "dependencies": [],
+    "content": "Field WorkflowState of type text.",
+    "metadata": {
+      "field_name": "WorkflowState",
+      "field_type": "text",
+      "form": "IssueForm"
+    }
+  },
+  {
+    "id": "field_RelatedUNIDs_bf7f2913",
+    "type": "field",
+    "file_path": "sample_data\\issue_tracker\\forms\\IssueForm.dxl",
+    "language": "DXL",
+    "size_bytes": 48,
+    "line_count": 1,
+    "complexity": 1,
+    "dependencies": [],
+    "content": "Field RelatedUNIDs of type text.",
+    "metadata": {
+      "field_name": "RelatedUNIDs",
+      "field_type": "text",
+      "form": "IssueForm"
+    }
+  },
+  {
+    "id": "field_AttachmentRefs_f9258bc4",
+    "type": "field",
+    "file_path": "sample_data\\issue_tracker\\forms\\IssueForm.dxl",
+    "language": "DXL",
+    "size_bytes": 48,
+    "line_count": 1,
+    "complexity": 1,
+    "dependencies": [],
+    "content": "Field AttachmentRefs of type text.",
+    "metadata": {
+      "field_name": "AttachmentRefs",
+      "field_type": "text",
+      "form": "IssueForm"
+    }
+  },
+  {
+    "id": "lss_file_IssueUtils.lss_ecc07dd3",
+    "type": "lotusscript_file",
+    "file_path": "sample_data\\issue_tracker\\scriptlibraries\\ls\\IssueUtils.lss",
+    "language": "LotusScript",
+    "size_bytes": 403,
+    "line_count": 11,
+    "complexity": 4,
+    "dependencies": [],
+    "content": "LotusScript file IssueUtils.lss containing agents or shared logic.",
+    "metadata": {
+      "dependencies": []
+    }
+  },
+  {
+    "id": "lss_block_GenerateIssueID_cb1357d2",
+    "type": "function",
+    "file_path": "sample_data\\issue_tracker\\scriptlibraries\\ls\\IssueUtils.lss",
+    "language": "LotusScript",
+    "size_bytes": 174,
+    "line_count": 3,
+    "complexity": 0,
+    "dependencies": [],
+    "content": "Function GenerateIssueID(session As NotesSession) As String\n    GenerateIssueID = \"ISS-\" & Format$(Now, \"yyyymmdd-hhnnss\") & \"-\" & Right$(CStr(Int(Rnd*10000)),4)\nEnd Function",
+    "metadata": {
+      "name": "GenerateIssueID",
+      "parent_file": "IssueUtils.lss"
+    }
+  },
+  {
+    "id": "lss_block_LinkRelatedIssues_02e99a4a",
+    "type": "sub",
+    "file_path": "sample_data\\issue_tracker\\scriptlibraries\\ls\\IssueUtils.lss",
+    "language": "LotusScript",
+    "size_bytes": 157,
+    "line_count": 5,
+    "complexity": 2,
+    "dependencies": [],
+    "content": "Sub LinkRelatedIssues(doc As NotesDocument, relatedUNIDs As String)\n    If relatedUNIDs <> \"\" Then\n        doc.RelatedUNIDs = relatedUNIDs\n    End If\nEnd Sub",
+    "metadata": {
+      "name": "LinkRelatedIssues",
+      "parent_file": "IssueUtils.lss"
+    }
+  },
+  {
+    "id": "lss_file_NotificationUtils.lss_df5fa395",
+    "type": "lotusscript_file",
+    "file_path": "sample_data\\issue_tracker\\scriptlibraries\\ls\\NotificationUtils.lss",
+    "language": "LotusScript",
+    "size_bytes": 360,
+    "line_count": 11,
+    "complexity": 2,
+    "dependencies": [],
+    "content": "LotusScript file NotificationUtils.lss containing agents or shared logic.",
+    "metadata": {
+      "dependencies": []
+    }
+  },
+  {
+    "id": "lss_block_SendIssueNotification_c05b4ab2",
+    "type": "sub",
+    "file_path": "sample_data\\issue_tracker\\scriptlibraries\\ls\\NotificationUtils.lss",
+    "language": "LotusScript",
+    "size_bytes": 334,
+    "line_count": 10,
+    "complexity": 2,
+    "dependencies": [],
+    "content": "Sub SendIssueNotification(db As NotesDatabase, toUser As String, subj As String, body As String)\n    On Error Resume Next\n    Dim mailDoc As NotesDocument\n    Set mailDoc = db.CreateDocument()\n    mailDoc.Form = \"Memo\"\n    mailDoc.SendTo = toUser\n    mailDoc.Subject = subj\n    mailDoc.Body = body\n    Call mailDoc.Send(False)\nEnd Sub",
+    "metadata": {
+      "name": "SendIssueNotification",
+      "parent_file": "NotificationUtils.lss"
+    }
+  },
+  {
+    "id": "lss_file_SLAUtils.lss_c0790e75",
+    "type": "lotusscript_file",
+    "file_path": "sample_data\\issue_tracker\\scriptlibraries\\ls\\SLAUtils.lss",
+    "language": "LotusScript",
+    "size_bytes": 523,
+    "line_count": 16,
+    "complexity": 7,
+    "dependencies": [],
+    "content": "LotusScript file SLAUtils.lss containing agents or shared logic.",
+    "metadata": {
+      "dependencies": []
+    }
+  },
+  {
+    "id": "lss_block_ComputeSLADeadline_a655d520",
+    "type": "function",
+    "file_path": "sample_data\\issue_tracker\\scriptlibraries\\ls\\SLAUtils.lss",
+    "language": "LotusScript",
+    "size_bytes": 492,
+    "line_count": 15,
+    "complexity": 7,
+    "dependencies": [],
+    "content": "Function ComputeSLADeadline(slaType As String, createdDate As NotesDateTime) As NotesDateTime\n    Dim d As New NotesDateTime(createdDate.DateOnly)\n    Select Case Lcase$(slaType)\n        Case \"critical\"\n            Call d.AdjustDay(0)\n            Call d.AdjustTime(4,0,0)\n        Case \"standard\"\n            Call d.AdjustDay(3)\n        Case \"extended\"\n            Call d.AdjustDay(7)\n        Case Else\n            Call d.AdjustDay(3)\n    End Select\n    Set ComputeSLADeadline = d\nEnd Function",
+    "metadata": {
+      "name": "ComputeSLADeadline",
+      "parent_file": "SLAUtils.lss"
+    }
+  },
+  {
+    "id": "view_AllIssues_b61fc8ae",
+    "type": "view",
+    "file_path": "sample_data\\issue_tracker\\views\\AllIssuesView.dxl",
+    "language": "DXL",
+    "size_bytes": 695,
+    "line_count": 15,
+    "complexity": 6,
+    "dependencies": [],
+    "content": "Domino View AllIssues used for issue filtering and presentation.",
+    "metadata": {
+      "view_name": "AllIssues"
+    }
+  }
+]

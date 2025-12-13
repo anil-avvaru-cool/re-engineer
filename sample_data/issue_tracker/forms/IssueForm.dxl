@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<dxl:design xmlns:dxl="http://www.lotus.com/dxl" type="form" name="IssueForm">
+  <form>
+    <name>IssueForm</name>
+    <items>
+      <item name="Form"><text>IssueForm</text></item>
+      <item name="IssueID"><flags>computedwhencomposed</flags><text></text></item>
+      <item name="Title"><text></text></item>
+      <item name="Description"><richtext></richtext></item>
+      <item name="Priority"><text>Medium</text></item>
+      <item name="Status"><text>Open</text></item>
+      <item name="CreatedBy"><text></text></item>
+      <item name="CreatedDate"><datetime></datetime></item>
+      <item name="AssignedTo"><text></text></item>
+      <item name="NotifyOnCreate"><text>0</text></item>
+      <item name="SLAType"><text>Standard</text></item>
+      <item name="SLADeadline"><datetime></datetime></item>
+      <item name="WorkflowState"><text>New</text></item>
+      <item name="RelatedUNIDs"><text></text></item>
+      <item name="AttachmentRefs"><text></text></item>
+    </items>
+    <formformula><![CDATA[<!-- Add computed fields and layout in Designer after import -->]]></formformula>
+  </form>
+</dxl:design>

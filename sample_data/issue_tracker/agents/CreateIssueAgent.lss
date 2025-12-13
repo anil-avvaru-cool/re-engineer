@@ -1,0 +1,34 @@
+Option Public
+Use "IssueUtils"
+Use "NotificationUtils"
+Sub Initialize
+    On Error GoTo ErrHandler
+    Dim session As New NotesSession
+    Dim db As NotesDatabase
+    Set db = session.CurrentDatabase
+
+    Dim doc As NotesDocument
+    Set doc = db.CreateDocument()
+    doc.Form = "IssueForm"
+    doc.IssueID = GenerateIssueID(session)
+    doc.Title = "Sample issue created by CreateIssueAgent"
+    Dim rtitem As NotesRichTextItem
+    Set rtitem = New NotesRichTextItem(doc, "Description")
+    Call rtitem.AppendText("This issue was created by CreateIssueAgent for testing.")
+    doc.Priority = "Medium"
+    doc.Status = "New"
+    doc.CreatedBy = session.CommonUserName
+    doc.CreatedDate = Now
+    doc.AssignedTo = session.CommonUserName
+    doc.NotifyOnCreate = "1"
+    Call doc.Save(True, False)
+
+    If (doc.NotifyOnCreate(0) = "1") Then
+        Call SendIssueNotification(db, doc.AssignedTo(0), "New Issue Assigned: " & doc.IssueID(0), "Title: " & doc.Title(0))
+    End If
+
+    Messagebox "Issue created: " & doc.IssueID(0), , "CreateIssueAgent"
+    Exit Sub
+ErrHandler:
+    Messagebox "Error in CreateIssueAgent: " & Err & " - " & Error$, , "Agent Error"
+End Sub

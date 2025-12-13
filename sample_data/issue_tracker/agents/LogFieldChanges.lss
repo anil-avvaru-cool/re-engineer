@@ -1,0 +1,18 @@
+Option Public
+Sub Initialize
+    On Error Resume Next
+    Dim session As New NotesSession
+    Dim db As NotesDatabase
+    Set db = session.CurrentDatabase
+    Dim ctxDoc As NotesDocument
+    Set ctxDoc = session.DocumentContext
+    If ctxDoc Is Nothing Then Exit Sub
+    Dim log As NotesDocument
+    Set log = db.CreateDocument()
+    log.Form = "AuditLog"
+    log.ParentUNID = ctxDoc.UniversalID
+    log.ChangedBy = session.CommonUserName
+    log.ChangedDate = Now
+    log.ChangeDetails = "Placeholder: compute field diffs in form event"
+    Call log.Save(True, False)
+End Sub

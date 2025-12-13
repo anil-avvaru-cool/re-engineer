@@ -1,0 +1,14 @@
+Option Public
+Use "NotificationUtils"
+Sub Initialize
+    On Error Resume Next
+    Dim session As New NotesSession
+    Dim db As NotesDatabase
+    Set db = session.CurrentDatabase
+    Dim doc As NotesDocument
+    Set doc = session.DocumentContext
+    If doc Is Nothing Then Exit Sub
+    If doc.AssignedTo(0) <> "" Then
+        Call SendIssueNotification(db, doc.AssignedTo(0), "Issue Assigned: " & doc.IssueID(0), "You have been assigned " & doc.IssueID(0))
+    End If
+End Sub

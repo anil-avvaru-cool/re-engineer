@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<!DOCTYPE view SYSTEM "view.dtd">
+<view xmlns="http://www.lotus.com/dxl" version="9.0">
+    <noteinfo noteid="FFFFFFFF" unid="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"/>
+
+    <!-- View Title -->
+    <item name="$TITLE">
+        <text>New Issues\New Issues</text>
+    </item>
+
+    <!-- Standard view flags -->
+    <item name="$Flags">
+        <text>3F0</text>
+    </item>
+
+    <!-- Select all Issue documents with Status = "New" -->
+    <item name="$Formula">
+        <formula>
+            SELECT Form = "Issue" &amp; Status = "New"
+        </formula>
+    </item>
+
+    <!-- Column 1: Subject -->
+    <column itemname="Subject" sort="ascending" resort="true">
+        <columnheader title="Subject"/>
+        <columnvalue>
+            <formula>Subject</formula>
+        </columnvalue>
+    </column>
+
+    <!-- Column 2: Priority -->
+    <column itemname="Priority" resort="true">
+        <columnheader title="Priority"/>
+        <columnvalue>
+            <formula>Priority</formula>
+        </columnvalue>
+    </column>
+
+    <!-- Column 3: Assigned To -->
+    <column itemname="AssignedTo" resort="true">
+        <columnheader title="Assigned To"/>
+        <columnvalue>
+            <formula>AssignedTo</formula>
+        </columnvalue>
+    </column>
+
+    <!-- Column 4: Created -->
+    <column itemname="Created" sort="descending" resort="true">
+        <columnheader title="Created"/>
+        <columnvalue>
+            <formula>@Created</formula>
+        </columnvalue>
+    </column>
+
+    <!-- Column 5: Last Updated -->
+    <column itemname="Modified" resort="true">
+        <columnheader title="Last Updated"/>
+        <columnvalue>
+            <formula>@Modified</formula>
+        </columnvalue>
+    </column>
+
+</view>

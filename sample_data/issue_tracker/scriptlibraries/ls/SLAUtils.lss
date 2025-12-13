@@ -1,0 +1,16 @@
+Option Public
+Function ComputeSLADeadline(slaType As String, createdDate As NotesDateTime) As NotesDateTime
+    Dim d As New NotesDateTime(createdDate.DateOnly)
+    Select Case Lcase$(slaType)
+        Case "critical"
+            Call d.AdjustDay(0)
+            Call d.AdjustTime(4,0,0)
+        Case "standard"
+            Call d.AdjustDay(3)
+        Case "extended"
+            Call d.AdjustDay(7)
+        Case Else
+            Call d.AdjustDay(3)
+    End Select
+    Set ComputeSLADeadline = d
+End Function

@@ -1,0 +1,42 @@
+Option Public
+Sub Initialize
+    Dim session As New NotesSession
+    Dim db As NotesDatabase
+    Set db = session.CurrentDatabase
+    Dim view As NotesView
+    Set view = db.GetView("AllIssues")
+    Dim doc As NotesDocument
+    Set doc = view.GetFirstDocument()
+    Dim json As String
+    json = "["
+    Dim first As Boolean
+    first = True
+    While Not doc Is Nothing
+        If Not first Then json = json & ","
+        json = json & "{"
+        json = json & chr$(34) & "IssueID" & chr$(34) & ":" & chr$(34) & EscapeJSON(doc.IssueID(0)) & chr$(34) & ","
+        json = json & chr$(34) & "Title" & chr$(34) & ":" & chr$(34) & EscapeJSON(doc.Title(0)) & chr$(34) & ","
+        json = json & chr$(34) & "Priority" & chr$(34) & ":" & chr$(34) & EscapeJSON(doc.Priority(0)) & chr$(34) & ","
+        json = json & chr$(34) & "Status" & chr$(34) & ":" & chr$(34) & EscapeJSON(doc.Status(0)) & chr$(34)
+        json = json & "}"
+        first = False
+        Set doc = view.GetNextDocument(doc)
+    Wend
+    json = json & "]"
+    Print |Content-Type: application/json|
+    Print ""
+    Print json
+End Sub
+
+Function EscapeJSON(s As String) As String
+    If s = "" Then
+        EscapeJSON = ""
+        Exit Function
+    End If
+    s = Replace(s, "\\", "\\\\")
+    s = Replace(s, "\""", "\\\"")
+    s = Replace(s, "/", "\\/")
+    s = Replace(s, Chr(10), "\\n")
+    s = Replace(s, Chr(13), "\\r")
+    EscapeJSON = s
+End Function

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dxl>
+  <agent name="CreateIssueAgent">
+    <trigger>OnSchedule</trigger>
+    <lotusscript>
+Option Public
+Use "IssueUtils"
+Use "NotificationUtils"
+Sub Initialize
+    On Error GoTo ErrHandler
+    Dim session As New NotesSession
+    Dim db As NotesDatabase
+    Set db = session.CurrentDatabase
+
+    Dim doc As NotesDocument
+    Set doc = db.CreateDocument()
+    doc.Form = "IssueForm"
+    doc.IssueID = GenerateIssueID(session)
+    doc.Title = "Sample issue created by CreateIssueAgent"
+    Dim rtitem As NotesRichTextItem
+    Set rtitem = New NotesRichTextItem(doc, "Description")
+    Call rtitem.AppendText("This issue was created by CreateIssueAgent for testing.")
+    doc.Priority = "Medium"
+    doc.Status = "New"
+    doc.CreatedBy = session.CommonUserName
+    doc.CreatedDate = Now
+    doc.AssignedTo = session.CommonUserName
+    doc.NotifyOnCreate = "1"
+    Call doc.Save(True, False)
+
+    If (doc.NotifyOnCreate(0) = "1") Then
+        Call SendIssueNotification(db, doc.AssignedTo(0), "New Issue Assigned: " & doc.IssueID(0), "Title: " & doc.Title(0))
+    End If
+
+    Messagebox "Issue created: " & doc.IssueID(0), , "CreateIssueAgent"
+    Exit Sub
+ErrHandler:
+    Messagebox "Error in CreateIssueAgent: " & Err & " - " & Error$, , "Agent Error"
+End Sub
+    </lotusscript>
+  </agent>
+   <agent name="GetIssues">
+    <trigger>OnSchedule</trigger>
+    <lotusscript>
+Option Public
+Sub Initialize
+    Dim session As New NotesSession
+    Dim db As NotesDatabase
+    Set db = session.CurrentDatabase
+    Dim view As NotesView
+    Set view = db.GetView("AllIssues")
+    Dim doc As NotesDocument
+    Set doc = view.GetFirstDocument()
+    Dim json As String
+    json = "["
+    Dim first As Boolean
+    first = True
+    While Not doc Is Nothing
+        If Not first Then json = json & ","
+        json = json & "{"
+        json = json & chr$(34) & "IssueID" & chr$(34) & ":" & chr$(34) & doc.IssueID(0) & chr$(34) & ","
+        json = json & chr$(34) & "Title" & chr$(34) & ":" & chr$(34) & Replace(doc.Title(0), chr$(34), "\" & chr$(34)) & chr$(34)
+        json = json & "}"
+        first = False
+        Set doc = view.GetNextDocument(doc)
+    Wend
+    json = json & "]"
+    Print |Content-Type: application/json|
+    Print ""
+    Print json
+End Sub
+    </lotusscript>
+  </agent>
+<agent name="NotifyOnAssignment">
+    <trigger>OnSchedule</trigger>
+    <lotusscript>
+Option Public
+Use "NotificationUtils"
+Sub Initialize
+    On Error Resume Next
+    Dim session As New NotesSession
+    Dim db As NotesDatabase
+    Set db = session.CurrentDatabase
+    Dim doc As NotesDocument
+    Set doc = session.DocumentContext
+    If doc Is Nothing Then Exit Sub
+    If doc.AssignedTo(0) <> "" Then
+        Call SendIssueNotification(db, doc.AssignedTo(0), "Issue Assigned: " & doc.IssueID(0), "You have been assigned " & doc.IssueID(0))
+    End If
+End Sub
+    </lotusscript>
+  </agent>
+
+  <form name="IssueForm">
+    <event name="QueryOpen">
+      <lotusscript>
+Sub Queryopen(Source As Notesuidocument, Mode As Integer, Isnewdoc As Variant, Continue As Variant)
+  ' ...
+End Sub
+      </lotusscript>
+    </event>
+  </form>
+</dxl>

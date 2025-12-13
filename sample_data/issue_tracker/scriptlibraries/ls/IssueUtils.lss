@@ -1,0 +1,11 @@
+Option Public
+' Issue utility functions for Issue Tracker
+Function GenerateIssueID(session As NotesSession) As String
+    GenerateIssueID = "ISS-" & Format$(Now, "yyyymmdd-hhnnss") & "-" & Right$(CStr(Int(Rnd*10000)),4)
+End Function
+
+Sub LinkRelatedIssues(doc As NotesDocument, relatedUNIDs As String)
+    If relatedUNIDs <> "" Then
+        doc.RelatedUNIDs = relatedUNIDs
+    End If
+End Sub

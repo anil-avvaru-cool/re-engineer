@@ -1,0 +1,20 @@
+{
+  "codebase_name": "MyWebApp",
+  "chunks": [
+    {
+      "id": 1,
+      "type": "module",
+      "path": "src/components/Button.js",
+      "formatted_code": "function Button() {...}",
+      "complexity": 23,
+      "size_in_mb": 1,
+      "dependencies": ["utility-lib"]
+    },
+    {
+      "id": 2,
+      "type": "utility",
+      "path": "src/utils/format.js",
+      "formatted_code": "function formatString() {...}"
+    }
+  ]
+}

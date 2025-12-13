@@ -1,0 +1,27 @@
+Option Public
+Sub Initialize
+    Dim session As New NotesSession
+    Dim db As NotesDatabase
+    Set db = session.CurrentDatabase
+    Dim view As NotesView
+    Set view = db.GetView("AllIssues")
+    Dim doc As NotesDocument
+    Set doc = view.GetFirstDocument()
+    Dim json As String
+    json = "["
+    Dim first As Boolean
+    first = True
+    While Not doc Is Nothing
+        If Not first Then json = json & ","
+        json = json & "{"
+        json = json & chr$(34) & "IssueID" & chr$(34) & ":" & chr$(34) & doc.IssueID(0) & chr$(34) & ","
+        json = json & chr$(34) & "Title" & chr$(34) & ":" & chr$(34) & Replace(doc.Title(0), chr$(34), "\" & chr$(34)) & chr$(34)
+        json = json & "}"
+        first = False
+        Set doc = view.GetNextDocument(doc)
+    Wend
+    json = json & "]"
+    Print |Content-Type: application/json|
+    Print ""
+    Print json
+End Sub

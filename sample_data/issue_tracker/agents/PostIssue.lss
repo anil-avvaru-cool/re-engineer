@@ -1,0 +1,20 @@
+Option Public
+Sub Initialize
+    Dim session As New NotesSession
+    Dim db As NotesDatabase
+    Set db = session.CurrentDatabase
+    Dim doc As NotesDocument
+    Set doc = db.CreateDocument()
+    doc.Form = "IssueForm"
+    doc.Title = session.DocumentContext.GetItemValue("Title")(0)
+    doc.IssueID = "ISS-" & Format$(Now, "yyyymmdd-hhnnss")
+    doc.Description = session.DocumentContext.GetItemValue("Description")(0)
+    doc.Priority = session.DocumentContext.GetItemValue("Priority")(0)
+    doc.Status = "New"
+    doc.CreatedBy = session.CommonUserName
+    doc.CreatedDate = Now
+    Call doc.Save(True, False)
+    Print |Content-Type: application/json|
+    Print ""
+    Print "{""status"":""ok"",""IssueID"":""" & doc.IssueID(0) & """}"
+End Sub

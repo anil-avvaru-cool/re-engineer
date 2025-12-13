@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<!DOCTYPE view SYSTEM "view.dtd">
+<view xmlns="http://www.lotus.com/dxl" version="9.0">
+    <noteinfo noteid="FFFFFFFF" unid="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"/>
+    <item name="$TITLE">
+        <text>By Status\By Status</text>
+    </item>
+
+    <!-- View flags: Allow sorting, show unread, etc. -->
+    <item name="$Flags">
+        <text>3F0</text>
+    </item>
+
+    <!-- Selection formula: All Issue documents -->
+    <item name="$Formula">
+        <formula>
+            SELECT Form = "Issue"
+        </formula>
+    </item>
+
+    <!-- Column 1: Status (categorized) -->
+    <column hidedetailrows="false" itemname="Status" sortnoaccent="true" 
+            resort="true" sort="ascending" categorize="true">
+        <columnheader title="Status"/>
+        <columnvalue>
+            <textlist>
+                <text>""</text>
+            </textlist>
+            <formula>Status</formula>
+        </columnvalue>
+    </column>
+
+    <!-- Column 2: Subject -->
+    <column itemname="Subject" sort="ascending" resort="true">
+        <columnheader title="Subject"/>
+        <columnvalue>
+            <formula>Subject</formula>
+        </columnvalue>
+    </column>
+
+    <!-- Column 3: Assigned To -->
+    <column itemname="AssignedTo" resort="true">
+        <columnheader title="Assigned To"/>
+        <columnvalue>
+            <formula>AssignedTo</formula>
+        </columnvalue>
+    </column>
+
+    <!-- Column 4: Priority -->
+    <column itemname="Priority" resort="true">
+        <columnheader title="Priority"/>
+        <columnvalue>
+            <formula>Priority</formula>
+        </columnvalue>
+    </column>
+
+    <!-- Column 5: Created -->
+    <column itemname="CreatedDate" resort="true" sort="ascending">
+        <columnheader title="Created"/>
+        <columnvalue>
+            <formula>@Created</formula>
+        </columnvalue>
+    </column>
+
+    <!-- Column 6: Last Updated -->
+    <column itemname="Modified" resort="true">
+        <columnheader title="Last Updated"/>
+        <columnvalue>
+            <formula>@Modified</formula>
+        </columnvalue>
+    </column>
+
+</view>

@@ -1,0 +1,16 @@
+[
+  {
+    "id": "agent:CreateIssueAgent:sub:0",
+    "type": "agent",
+    "name": "CreateIssueAgent",
+    "text": "Sub Initialize\n  Dim session As New NotesSession\n  Dim db As NotesDatabase\n  Set db = session.CurrentDatabase\n  ' ... sample content ...\nEnd Sub",
+    "source": "dxl"
+  },
+  {
+    "id": "formevent:QueryOpen:sub:0",
+    "type": "form_event",
+    "name": "QueryOpen",
+    "text": "Sub Queryopen(Source As Notesuidocument, Mode As Integer, Isnewdoc As Variant, Continue As Variant)\n  ' ...\nEnd Sub",
+    "source": "dxl"
+  }
+]

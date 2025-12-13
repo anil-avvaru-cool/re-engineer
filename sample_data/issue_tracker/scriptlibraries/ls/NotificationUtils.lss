@@ -1,0 +1,11 @@
+Option Public
+Sub SendIssueNotification(db As NotesDatabase, toUser As String, subj As String, body As String)
+    On Error Resume Next
+    Dim mailDoc As NotesDocument
+    Set mailDoc = db.CreateDocument()
+    mailDoc.Form = "Memo"
+    mailDoc.SendTo = toUser
+    mailDoc.Subject = subj
+    mailDoc.Body = body
+    Call mailDoc.Send(False)
+End Sub
