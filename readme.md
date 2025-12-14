@@ -43,7 +43,7 @@ FOR (p:Procedure) REQUIRE p.procedureId IS UNIQUE;
 
 ```cipher
 LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/anil-avvaru-cool/re-engineer/refs/heads/main/neo4j/artifact_nodes.csv' AS row
-MERGE (a:Artifact {artifactId: row.id})
+MERGE (a:Artifact {artifactId: row.artifactId})
 SET
   a.type = row.type,
   a.path = row.path;
@@ -51,13 +51,21 @@ SET
 
 ```cipher
 LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/anil-avvaru-cool/re-engineer/refs/heads/main/neo4j/procedure_nodes.csv' AS row
-MERGE (:Procedure {procedureId: row.id})
+MERGE (p:Procedure {procedureId: row.procedureId})
 SET
-  _.name = row.name,
-  _.file_path = row.file_path,
-  _.complexity = toInteger(row.complexity),
-  _.size = toInteger(row.size);
+  p.name = row.name,
+  p.file_path = row.file_path,
+  p.complexity = toInteger(row.complexity),
+  p.size = toInteger(row.size);
 ```
+```cipher
+LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/anil-avvaru-cool/re-engineer/refs/heads/main/neo4j/relationships.csv' AS row
+MATCH (p:Procedure {procedureId: row.procedureId})
+MATCH (a:Artifact {artifactId: row.artifactId})
+MERGE (p)-[r:CALL_DEF]->(a);
+
+```
+
 ```cipher
 
 ```

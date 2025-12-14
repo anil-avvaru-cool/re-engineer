@@ -111,7 +111,7 @@ def main():
     # Relationships
     # -------------------------------------------------
     with open(os.path.join(args.out, "relationships.csv"), "w", encoding="utf-8") as f:
-        f.write(":START_ID,:END_ID,:TYPE\n")
+        f.write("procedureId,artifactId,TYPE\n")
 
         # DEFINED_IN
         for p in procedures.values():
