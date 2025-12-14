@@ -1,4 +1,4 @@
-id:ID,name,file_path,complexity,size
+procedureId,name,file_path,complexity,size
 lss_file_CreateIssueAgent.lss_d8084587,lss_file_CreateIssueAgent.lss_d8084587,sample_data\issue_tracker\agents\CreateIssueAgent.lss,8,1168
 lss_block_Initialize_01f187b1,Initialize,sample_data\issue_tracker\agents\CreateIssueAgent.lss,8,1112
 lss_file_GetIssues.lss_d8a1e759,lss_file_GetIssues.lss_d8a1e759,sample_data\issue_tracker\agents\GetIssues.lss,3,905

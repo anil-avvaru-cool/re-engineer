@@ -10,7 +10,6 @@ import tree_sitter
 # Tree-sitter setup
 # -------------------------------------------------
 parser = tree_sitter.Parser()
-#parser.set_language(tree_sitter_lotus.language())
 language = tree_sitter.Language(tree_sitter_lotus.language())
 parser.language = language
 
@@ -94,7 +93,7 @@ def main():
     # Artifact Nodes
     # -------------------------------------------------
     with open(os.path.join(args.out, "artifact_nodes.csv"), "w", encoding="utf-8") as f:
-        f.write("id:ID,type,path\n")
+        f.write("artifactId,type,path\n")
         for a in artifacts.values():
             f.write(f"{a['id']},{a['type']},{a['path']}\n")
 
@@ -102,7 +101,7 @@ def main():
     # Procedure Nodes
     # -------------------------------------------------
     with open(os.path.join(args.out, "procedure_nodes.csv"), "w", encoding="utf-8") as f:
-        f.write("id:ID,name,file_path,complexity,size\n")
+        f.write("procedureId,name,file_path,complexity,size\n")
         for p in procedures.values():
             f.write(
                 f"{p['id']},{p['name']},{p['file_path']},{p['complexity']},{p['size']}\n"

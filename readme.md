@@ -22,29 +22,36 @@ python .\ingest\dxl_lss_parser.py .\sample_data\issue_tracker\
 # Graph
 python graph/chunks_to_neo4j.py --input chunks.json --out ./neo4j
 
+## Drop if exists
+```cipher
+DROP CONSTRAINT artifact_id IF EXISTS;
+```
+## Delete node
+```cipher
+MATCH (n:Artifact) DELETE n;
+```
+
 ```cipher
 CREATE CONSTRAINT artifact_id IF NOT EXISTS
-FOR (p:Artifact) REQUIRE p.id IS UNIQUE;
+FOR (a:Artifact) REQUIRE a.artifactId IS UNIQUE;
 ```
 
 ```cipher
 CREATE CONSTRAINT procedure_id IF NOT EXISTS
-FOR (p:Procedure) REQUIRE p.id IS UNIQUE;
+FOR (p:Procedure) REQUIRE p.procedureId IS UNIQUE;
 ```
-
 
 ```cipher
 LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/anil-avvaru-cool/re-engineer/refs/heads/main/neo4j/artifact_nodes.csv' AS row
-MERGE (:Artifact {id: row.id})
+MERGE (a:Artifact {artifactId: row.id})
 SET
-  _.type = row.type,
-  _.path = row.path;
-
+  a.type = row.type,
+  a.path = row.path;
 ```
 
 ```cipher
 LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/anil-avvaru-cool/re-engineer/refs/heads/main/neo4j/procedure_nodes.csv' AS row
-MERGE (:Procedure {id: row.id})
+MERGE (:Procedure {procedureId: row.id})
 SET
   _.name = row.name,
   _.file_path = row.file_path,
