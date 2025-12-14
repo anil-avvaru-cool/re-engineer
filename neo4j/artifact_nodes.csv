@@ -1,4 +1,4 @@
-id:ID,type,path
+id,type,path
 artifact_e5465054,Agent,sample_data\issue_tracker\agents\CreateIssueAgent.lss
 artifact_88538710,Agent,sample_data\issue_tracker\agents\GetIssues.lss
 artifact_65e5b23c,Agent,sample_data\issue_tracker\agents\IssuesJSONAgent.lss
