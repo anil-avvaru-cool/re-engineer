@@ -25,10 +25,12 @@ python graph/chunks_to_neo4j.py --input chunks.json --out ./neo4j
 ## Drop if exists
 ```cipher
 DROP CONSTRAINT artifact_id IF EXISTS;
+DROP CONSTRAINT procedure_id IF EXISTS;
 ```
 ## Delete node
 ```cipher
 MATCH (n:Artifact) DELETE n;
+MATCH (n:Procedure) DELETE n;
 ```
 
 ```cipher
@@ -62,7 +64,8 @@ SET
 LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/anil-avvaru-cool/re-engineer/refs/heads/main/neo4j/relationships.csv' AS row
 MATCH (p:Procedure {procedureId: row.procedureId})
 MATCH (a:Artifact {artifactId: row.artifactId})
-MERGE (p)-[r:CALL_DEF]->(a);
+MERGE (p)-[r:CALLS{row: row.TYPE}]->(a)
+RETURN count(r)
 
 ```
 
