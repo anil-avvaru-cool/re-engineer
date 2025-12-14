@@ -25,6 +25,9 @@ python graph/chunks_to_neo4j.py --input chunks.json --out ./neo4j --include-lotu
 # interactive query
 python cli/run_query.py --index faiss.index --meta meta.json
 
+# Neo4j tutorial
+https://www.youtube.com/watch?v=8jNPelugC2s&t=597s
+
 # Below are Not used
 # run ingestion + index
 python ingest/dxl_parser.py sample_data/demo_dxl.xml chunks.json

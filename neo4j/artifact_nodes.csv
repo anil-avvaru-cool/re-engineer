@@ -1,0 +1,11 @@
+id:ID,type,path
+artifact_e5465054,Agent,sample_data\issue_tracker\agents\CreateIssueAgent.lss
+artifact_88538710,Agent,sample_data\issue_tracker\agents\GetIssues.lss
+artifact_65e5b23c,Agent,sample_data\issue_tracker\agents\IssuesJSONAgent.lss
+artifact_46a03843,Agent,sample_data\issue_tracker\agents\LogFieldChanges.lss
+artifact_5282e4c9,Agent,sample_data\issue_tracker\agents\NotifyOnAssignment.lss
+artifact_0c368569,Agent,sample_data\issue_tracker\agents\PostIssue.lss
+artifact_36f6ebe6,Agent,sample_data\issue_tracker\agents\SLAUpdater.lss
+artifact_913e0c77,ScriptLibrary,sample_data\issue_tracker\scriptlibraries\ls\IssueUtils.lss
+artifact_e607a03b,ScriptLibrary,sample_data\issue_tracker\scriptlibraries\ls\NotificationUtils.lss
+artifact_db1c41ac,ScriptLibrary,sample_data\issue_tracker\scriptlibraries\ls\SLAUtils.lss

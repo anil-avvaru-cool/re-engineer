@@ -18,9 +18,6 @@ parser.language = language
 # AST utilities
 # -------------------------------------------------
 def parse_calls(code: str):
-    """
-    Extract procedure calls from LotusScript using AST.
-    """
     tree = parser.parse(code.encode("utf-8"))
     root = tree.root_node
     calls = set()
@@ -37,29 +34,25 @@ def parse_calls(code: str):
 
     return sorted(calls)
 
+def classify_artifact(path: str):
+    p = path.lower()
+    if "agent" in p:
+        return "Agent"
+    if "lib" in p:
+        return "ScriptLibrary"
+    if "form" in p:
+        return "Form"
+    return "Artifact"
+
 # -------------------------------------------------
 # CLI
 # -------------------------------------------------
 def main():
     argp = argparse.ArgumentParser(
-        description="Convert chunks.json into Neo4j dependency graph using tree-sitter-lotus"
+        description="Generate Neo4j-ready dependency graph from chunks.json"
     )
-    argp.add_argument(
-        "--input", "-i",
-        required=True,
-        help="Path to chunks.json"
-    )
-    argp.add_argument(
-        "--out", "-o",
-        default="neo4j",
-        help="Output directory for Neo4j CSV files"
-    )
-    argp.add_argument(
-        "--include-lotus-only",
-        action="store_true",
-        help="Process only LotusScript chunks"
-    )
-
+    argp.add_argument("--input", "-i", required=True)
+    argp.add_argument("--out", "-o", default="neo4j")
     args = argp.parse_args()
 
     os.makedirs(args.out, exist_ok=True)
@@ -71,12 +64,9 @@ def main():
     artifacts = {}
 
     # -------------------------------------------------
-    # Build nodes
+    # Build in-memory model
     # -------------------------------------------------
     for c in chunks:
-        if args.include_lotus_only and c.get("language") != "LotusScript":
-            continue
-
         if c.get("language") != "LotusScript":
             continue
 
@@ -88,37 +78,40 @@ def main():
             "id": proc_id,
             "name": proc_name,
             "file_path": file_path,
-            "complexity": c.get("complexity", 0),
-            "size": c.get("size_bytes", 0),
+            "complexity": int(c.get("complexity", 0)),
+            "size": int(c.get("size_bytes", 0)),
             "calls": parse_calls(c.get("content", ""))
         }
 
         if file_path not in artifacts:
             artifacts[file_path] = {
                 "id": f"artifact_{uuid.uuid4().hex[:8]}",
-                "path": file_path
+                "path": file_path,
+                "type": classify_artifact(file_path)
             }
 
     # -------------------------------------------------
-    # Write Neo4j Nodes CSV
+    # Artifact Nodes
     # -------------------------------------------------
-    nodes_path = os.path.join(args.out, "nodes.csv")
-    with open(nodes_path, "w", encoding="utf-8") as f:
-        f.write("id:ID,label,name,file_path,complexity,size\n")
-
+    with open(os.path.join(args.out, "artifact_nodes.csv"), "w", encoding="utf-8") as f:
+        f.write("id:ID,type,path\n")
         for a in artifacts.values():
-            f.write(f"{a['id']},Artifact,,{a['path']},,\n")
+            f.write(f"{a['id']},{a['type']},{a['path']}\n")
 
+    # -------------------------------------------------
+    # Procedure Nodes
+    # -------------------------------------------------
+    with open(os.path.join(args.out, "procedure_nodes.csv"), "w", encoding="utf-8") as f:
+        f.write("id:ID,name,file_path,complexity,size\n")
         for p in procedures.values():
             f.write(
-                f"{p['id']},Procedure,{p['name']},{p['file_path']},{p['complexity']},{p['size']}\n"
+                f"{p['id']},{p['name']},{p['file_path']},{p['complexity']},{p['size']}\n"
             )
 
     # -------------------------------------------------
-    # Write Neo4j Relationships CSV
+    # Relationships
     # -------------------------------------------------
-    rels_path = os.path.join(args.out, "relationships.csv")
-    with open(rels_path, "w", encoding="utf-8") as f:
+    with open(os.path.join(args.out, "relationships.csv"), "w", encoding="utf-8") as f:
         f.write(":START_ID,:END_ID,:TYPE\n")
 
         # DEFINED_IN
@@ -130,12 +123,12 @@ def main():
         for p in procedures.values():
             for callee in p["calls"]:
                 for target in procedures.values():
-                    if target["name"] == callee:
+                    if target["name"].lower() == callee.lower():
                         f.write(f"{p['id']},{target['id']},CALLS\n")
 
-    print("Neo4j graph generated successfully")
-    print(f"Nodes: {nodes_path}")
-    print(f"Relationships: {rels_path}")
+    print("Neo4j CSV generation completed")
+    print(f"Artifacts: {len(artifacts)}")
+    print(f"Procedures: {len(procedures)}")
 
 # -------------------------------------------------
 if __name__ == "__main__":
